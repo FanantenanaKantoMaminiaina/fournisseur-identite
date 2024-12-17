@@ -1,14 +1,14 @@
 package model;
 
 public class Utilisateur{
-    String idUtilisateur;
+    int idUtilisateur;
     String email;
     String mdp;
 
-    public String getIdUtilisateur() {
+    public int getIdUtilisateur() {
         return idUtilisateur;
     }
-    public void setIdUtilisateur(String idUtilisateur) {
+    public void setIdUtilisateur(int idUtilisateur) {
         this.idUtilisateur = idUtilisateur;
     }
     public String getEmail() {

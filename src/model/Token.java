@@ -3,15 +3,15 @@ package model;
 import java.sql.Timestamp;
 
 public class Token{
-    String idToken;
+    int idToken;
     String token;
     Timestamp expirationToken;
     Utilisateur utilisateur;
 
-    public String getIdToken() {
+    public int getIdToken() {
         return idToken;
     }
-    public void setIdToken(String idToken) {
+    public void setIdToken(int idToken) {
         this.idToken = idToken;
     }
     public String getToken() {

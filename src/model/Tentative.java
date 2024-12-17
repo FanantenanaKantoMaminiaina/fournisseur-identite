@@ -3,15 +3,15 @@ package model;
 import java.sql.Timestamp;
 
 public class Tentative{
-    String idTentative;
+    int idTentative;
     int nb;
     Timestamp dateReconnexion;
     Utilisateur utilisateur;
     
-    public String getIdTentative() {
+    public int getIdTentative() {
         return idTentative;
     }
-    public void setIdTentative(String idTentative) {
+    public void setIdTentative(int idTentative) {
         this.idTentative = idTentative;
     }
     public int getNb() {
