@@ -299,4 +299,6 @@ public class Utilitaire {
         Pattern pattern = Pattern.compile(emailRegex);
         return pattern.matcher(value).matches();
     }
+
+    // public static long 
 }
