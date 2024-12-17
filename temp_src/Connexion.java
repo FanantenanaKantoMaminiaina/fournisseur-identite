@@ -8,7 +8,7 @@ public class Connexion {
     public static Connection connect() throws Exception {
         Connection connection = null;
         try {
-            String url = "jdbc:postgresql://localhost:5432/fournisseur-identite";
+            String url = "jdbc:postgresql://localhost:5432/fournisseur_identite";
             String username = "postgres";
             String password = "postgres";
             connection = DriverManager.getConnection(url, username, password);
