@@ -1,37 +1,43 @@
+psql -U postgres -d postgres
+
+create database fournisseur_identite;
+
+\c fournisseur_identite;
+
+psql -U postgres -d fournisseur_identite
+
 CREATE TABLE utilisateur(
-   id INTEGER,
-   nom VARCHAR(50)  NOT NULL,
-   prenom VARCHAR(50) ,
-   dtn DATE NOT NULL,
-   email VARCHAR(50)  NOT NULL,
-   PRIMARY KEY(id),
+   id_utilisateur SERIAL,
+   email VARCHAR(180)  NOT NULL,
+   mdp VARCHAR(256)  NOT NULL,
+   PRIMARY KEY(id_utilisateur),
    UNIQUE(email)
 );
 
 CREATE TABLE connexion(
-   id VARCHAR(50) ,
+   id_connexion SERIAL,
    token VARCHAR(100) ,
    expiration_token TIMESTAMP,
-   id_1 INTEGER NOT NULL,
-   PRIMARY KEY(id),
+   id_utilisateur INTEGER NOT NULL,
+   PRIMARY KEY(id_connexion),
    UNIQUE(token),
-   FOREIGN KEY(id_1) REFERENCES utilisateur(id)
+   FOREIGN KEY(id_utilisateur) REFERENCES utilisateur(id_utilisateur)
 );
 
 CREATE TABLE tentative(
-   id VARCHAR(50) ,
+   id_tentative SERIAL,
    nb SMALLINT,
    date_reconnexion TIMESTAMP,
-   id_1 INTEGER NOT NULL,
-   PRIMARY KEY(id),
-   FOREIGN KEY(id_1) REFERENCES utilisateur(id)
+   id_utilisateur INTEGER NOT NULL,
+   PRIMARY KEY(id_tentative),
+   FOREIGN KEY(id_utilisateur) REFERENCES utilisateur(id_utilisateur)
 );
 
 CREATE TABLE authentification(
-   id VARCHAR(50) ,
+   id_authentification SERIAL,
    code_pin VARCHAR(50) ,
    expiration_pin TIMESTAMP,
-   id_1 INTEGER NOT NULL,
-   PRIMARY KEY(id),
-   FOREIGN KEY(id_1) REFERENCES utilisateur(id)
+   id_utilisateur INTEGER NOT NULL,
+   PRIMARY KEY(id_authentification),
+   FOREIGN KEY(id_utilisateur) REFERENCES utilisateur(id_utilisateur)
 );

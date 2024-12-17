@@ -3,15 +3,15 @@ package model;
 import java.sql.Timestamp;
 
 public class Authentification{
-    String idAuthentification;
+    int idAuthentification;
     int codePin;
     Timestamp expirationPin;
     Utilisateur utilisateur;
 
-    public String getIdAuthentification() {
+    public int getIdAuthentification() {
         return idAuthentification;
     }
-    public void setIdAuthentification(String idAuthentification) {
+    public void setIdAuthentification(int idAuthentification) {
         this.idAuthentification = idAuthentification;
     }
     public int getCodePin() {
