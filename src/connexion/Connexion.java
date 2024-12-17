@@ -10,7 +10,7 @@ public class Connexion {
         try {
             String url = "jdbc:postgresql://localhost:5432/fournisseur_identite";
             String username = "postgres";
-            String password = "postgres";
+            String password = "Manda";
             connection = DriverManager.getConnection(url, username, password);
             connection.setAutoCommit(false);
             
