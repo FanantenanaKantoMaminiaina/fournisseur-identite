@@ -81,8 +81,8 @@ public class Utilisateur{
             String htmlContent = new String(Files.readAllBytes(Paths.get(htmlEmplacement)));
 
             // Remplacer le token dans l'URL
-            String url = "https://votre-site.com/valider?token=" + validation_token;
-            htmlContent = htmlContent.replace("https://votre-site.com/valider?token=123456", url);
+            String url = "http://localhost:8081/fournisseur-identite/api/inscription?validationToken=" + validation_token;
+            htmlContent = htmlContent.replace("http://localhost:8081/fournisseur-identite/api/inscription?validationToken=", url);
 
             return htmlContent;
         } catch (IOException e) {
