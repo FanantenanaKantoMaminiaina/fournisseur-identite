@@ -21,6 +21,7 @@ import java.sql.Timestamp;
 import model.Utilisateur;
 import model.Authentification;
 import model.Tentative;
+import model.Configuration;
 import util.ApiResponse;
 import util.Utilitaire;
 import util.UtilitaireAuthentification;
@@ -37,6 +38,8 @@ public class AuthentificationApiController extends HttpServlet {
 
         try {
             connection = Connexion.connect();
+
+            Configuration configuration = Configuration.getConfiguration(connection);
 
             StringBuilder jsonBuffer = new StringBuilder();
             String line;
@@ -70,7 +73,7 @@ public class AuthentificationApiController extends HttpServlet {
                 return;
             }else if (!authentification.getCodePin().equals(pin)) {
                 int nbTentative = Tentative.getNbTentativeParEmail(email, connection);
-                if (nbTentative >= 3 ) {
+                if (nbTentative >= configuration.getLimiteTentative() ) {
                     response.getWriter().print(ApiResponse.error(401, "Trop de tentatives echouees. Compte temporairement bloque.", "/api/resetTentatives?email=" + email));
                     return;
                 }
@@ -93,7 +96,7 @@ public class AuthentificationApiController extends HttpServlet {
 
             String token = UtilitaireAuthentification.generateRandomToken();
             Timestamp expirationToken = Utilitaire.getNow();
-            expirationToken = Utilitaire.addSeconds(expirationToken, 3600);                        
+            expirationToken = Utilitaire.addSeconds(expirationToken, configuration.getDureeVieToken());                        
             utilisateur.reinitialiseTentative(connection);
 
             int validationToken = utilisateur.addToken(connection, token, expirationToken);

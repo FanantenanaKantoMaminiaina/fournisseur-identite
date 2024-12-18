@@ -16,10 +16,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.sql.Connection;
 import java.sql.SQLException;
-import jdk.jshell.execution.Util;
-import model.Tentative;
 
+import model.Tentative;
 import model.Utilisateur;
+import model.Configuration;
 import util.ApiResponse;
 import util.Utilitaire;
 import util.UtilitaireAuthentification;
@@ -36,6 +36,8 @@ public class LoginApiController extends HttpServlet {
 
         try {
             connection = Connexion.connect();
+
+            Configuration configuration = Configuration.getConfiguration(connection);
 
             StringBuilder jsonBuffer = new StringBuilder();
             String line;
@@ -64,7 +66,7 @@ public class LoginApiController extends HttpServlet {
 
             if (!utilisateur.isValidPassword(password)) {
                 int nbTentative = Tentative.getNbTentativeParEmail(email, connection);
-                if (nbTentative >= 3 ) {
+                if (nbTentative >= configuration.getLimiteTentative() ) {
                     response.getWriter().print(ApiResponse.error(401, "Trop de tentatives echouees. Compte temporairement bloque.", "/api/resetTentatives?email=" + email));
                     return;
                 }
@@ -80,13 +82,14 @@ public class LoginApiController extends HttpServlet {
 
                 response.getWriter().print(ApiResponse.error(401, "Invalid credentials. Password invalid", null));
                 return;
-            }else if(utilisateur.isValidPassword(password) && Tentative.getNbTentativeParEmail(email, connection) >=3 ){
+            }else if(utilisateur.isValidPassword(password) && Tentative.getNbTentativeParEmail(email, connection) >= configuration.getLimiteTentative() ){
                 response.getWriter().print(ApiResponse.error(401, "Trop de tentatives echouees. Compte temporairement bloque.", "/api/resetTentatives?email=" + email));
                 return;
             }
 
             String pin = UtilitaireAuthentification.generatePin(6);
-            int validationPin = utilisateur.insertPin(connection, pin);
+            int validationPin = utilisateur.insertPin(connection, pin, configuration.getDureeViePin());
+            
             if(validationPin < 0){
                 response.getWriter().print(ApiResponse.error(401, "Error to generate PIN",null));
                 return;
