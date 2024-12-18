@@ -14,12 +14,12 @@ CREATE TABLE utilisateur(
    UNIQUE(email)
 );
 
-CREATE TABLE token(
-   id_token SERIAL,
+CREATE TABLE connexion(
+   id_connexion SERIAL,
    token VARCHAR(100) ,
    expiration_token TIMESTAMP,
    id_utilisateur INTEGER NOT NULL,
-   PRIMARY KEY(id_token),
+   PRIMARY KEY(id_connexion),
    UNIQUE(token),
    FOREIGN KEY(id_utilisateur) REFERENCES utilisateur(id_utilisateur)
 );
@@ -40,11 +40,4 @@ CREATE TABLE authentification(
    id_utilisateur INTEGER NOT NULL,
    PRIMARY KEY(id_authentification),
    FOREIGN KEY(id_utilisateur) REFERENCES utilisateur(id_utilisateur)
-);
-
-CREATE TABLE configuration (
-    id_configuration SERIAL PRIMARY KEY,
-    duree_vie_token INT NOT NULL,
-    duree_vie_pin INT NOT NULL,
-    limite_tentative INT NOT NULL
 );
