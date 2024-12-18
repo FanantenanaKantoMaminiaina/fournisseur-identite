@@ -63,13 +63,13 @@ public class Utilisateur{
         return UtilitaireAuthentification.isPasswordValid(this.getMdp(),password);
     }
 
-    public int insertPin(Connection connection, String pin)throws Exception {
+    public int insertPin(Connection connection, String pin ,int delaisPin)throws Exception {
         String sql = "INSERT INTO authentification (code_pin, expiration_pin, id_utilisateur) VALUES (?, ?, ?)";
         int generatedId = -1;
 
         try (PreparedStatement statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, pin);              
-            statement.setTimestamp(2, Utilitaire.addSeconds(Utilitaire.getNow(),90));
+            statement.setTimestamp(2, Utilitaire.addSeconds(Utilitaire.getNow(),delaisPin));
             statement.setInt(3, this.getIdUtilisateur());
 
             int affectedRows = statement.executeUpdate();

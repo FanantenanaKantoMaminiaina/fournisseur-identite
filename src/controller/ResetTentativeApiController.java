@@ -18,6 +18,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import model.Tentative;
+import model.Configuration;
 import util.ApiResponse;
 
 @WebServlet("/api/resetTentative")
@@ -30,6 +31,8 @@ public class ResetTentativeApiController extends HttpServlet {
 
         try {
             connection = Connexion.connect();
+
+            Configuration configuration = Configuration.getConfiguration(connection);
 
             StringBuilder jsonBuffer = new StringBuilder();
             String line;
