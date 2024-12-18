@@ -14,12 +14,12 @@ CREATE TABLE utilisateur(
    UNIQUE(email)
 );
 
-CREATE TABLE connexion(
-   id_connexion SERIAL,
+CREATE TABLE token(
+   id_token SERIAL,
    token VARCHAR(100) ,
    expiration_token TIMESTAMP,
    id_utilisateur INTEGER NOT NULL,
-   PRIMARY KEY(id_connexion),
+   PRIMARY KEY(id_token),
    UNIQUE(token),
    FOREIGN KEY(id_utilisateur) REFERENCES utilisateur(id_utilisateur)
 );

@@ -3,6 +3,9 @@ package util;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+// import java.util.Properties;
+// import jakarta.mail.*;
+// import jakarta.mail.internet.*;
 
 public class UtilitaireAuthentification{
 
@@ -51,7 +54,38 @@ public class UtilitaireAuthentification{
         }
     }
     
-    public boolean isPasswordValid(String passwordInput,String passwordHashe){
+    public static boolean isPasswordValid(String passwordHashe,String passwordInput){
         return hashPassword(passwordInput).equals(passwordHashe);
     }
+
+    // private void sendPinByEmail(String senderEmail, String senderPassword, String recipientEmail, String pinCode) {
+    //     final String host = "smtp.gmail.com";
+    //     final int port = 587;
+
+    //     Properties props = new Properties();
+    //     props.put("mail.smtp.auth", "true");
+    //     props.put("mail.smtp.starttls.enable", "true");
+    //     props.put("mail.smtp.host", host);
+    //     props.put("mail.smtp.port", port);
+
+    //     Session session = Session.getInstance(props, new Authenticator() {
+    //         protected PasswordAuthentication getPasswordAuthentication() {
+    //             return new PasswordAuthentication(senderEmail, senderPassword);
+    //         }
+    //     });
+
+    //     try {
+    //         Message message = new MimeMessage(session);
+    //         message.setFrom(new InternetAddress(senderEmail));
+    //         message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
+    //         message.setSubject("Votre code PIN d'authentification");
+    //         message.setText("Bonjour,\n\nVotre code PIN est : " + pinCode + "\n\nMerci!");
+
+    //         Transport.send(message);
+    //         System.out.println("Email envoyé avec succès à " + recipientEmail);
+    //     } catch (MessagingException e) {
+    //         e.printStackTrace();
+    //         System.out.println("Échec de l'envoi de l'email.");
+    //     }
+    // }
 }
