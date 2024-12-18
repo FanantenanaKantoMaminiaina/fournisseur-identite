@@ -102,7 +102,7 @@ public class AuthentificationApiController extends HttpServlet {
                         this.emailExpediteur,
                         this.passwordExpediteur,
                         utilisateur.getEmail(),
-                        "http://localhost:8080/fournisseur-identite/api/resetTentative?email=" + email
+                        UtilitaireAuthentification.getHtmlResetTentative("http://localhost:8080/fournisseur-identite/api/resetTentative?email=" + email)
                     );
                     response.getWriter().print(ApiResponse.error(401, "Trop de tentatives echouees. Compte temporairement bloque.", "http://localhost:8080/fournisseur-identite/api/resetTentative?email=" + email));
                     return;

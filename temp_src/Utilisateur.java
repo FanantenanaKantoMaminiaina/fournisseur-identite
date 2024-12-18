@@ -1,7 +1,5 @@
 package model;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -203,21 +201,8 @@ public class Utilisateur{
     }
 
     private static String preparerEmailValidation(String validation_token) {
-        String htmlEmplacement = "../../assets/validationCompte.html";
-        
-        try {
-            // Lire le contenu du fichier HTML
-            String htmlContent = new String(Files.readAllBytes(Paths.get(htmlEmplacement)));
-
-            // Remplacer le token dans l'URL
-            String url = "http://localhost:8080/fournisseur-identite/api/inscription?validationToken=" + validation_token;
-            htmlContent = htmlContent.replace("http://localhost:8080/fournisseur-identite/api/inscription?validationToken=" + validation_token, url);
-
-            return htmlContent;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "Erreur lors de la lecture du fichier HTML.";
-        }
+        String url = "http://localhost:8080/fournisseur-identite/api/inscription?validationToken=" + validation_token;
+        return UtilitaireAuthentification.getHtmlValidationCompte(url);
     }
 
     // envoyer un email avec le lien de validation
