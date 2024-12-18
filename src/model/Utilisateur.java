@@ -160,7 +160,6 @@ public class Utilisateur{
     }
 
     public static int updateInfo(String[] colName, String[] value, String token, Connection connection) throws Exception {
-        // Vérification des paramètres d'entrée
         if (colName == null || value == null || colName.length != value.length || colName.length == 0) {
             throw new IllegalArgumentException("Les tableaux colName et value doivent être non nuls, de même longueur et non vides.");
         }
@@ -168,12 +167,11 @@ public class Utilisateur{
             throw new IllegalArgumentException("Le token doit être non nul et non vide.");
         }
     
-        // Construction de la requête SQL
         StringBuilder query = new StringBuilder("UPDATE utilisateur SET ");
-        int columnsAdded = 0; // Compte les colonnes ajoutées à la requête
+        int columnsAdded = 0; 
         for (int i = 0; i < colName.length; i++) {
             if ("email".equalsIgnoreCase(colName[i])) {
-                continue; // Ignore le champ 'email'
+                continue; 
             }
             query.append(colName[i]).append(" = ?, ");
             columnsAdded++;
@@ -183,7 +181,6 @@ public class Utilisateur{
             throw new IllegalArgumentException("Aucune colonne valide à mettre à jour. Vérifiez vos paramètres.");
         }
     
-        // Retirer la dernière virgule et espace, et ajouter la condition WHERE
         query.setLength(query.length() - 2);
         query.append(" WHERE id_utilisateur = (SELECT id_utilisateur FROM token WHERE token = ?)");
         try (PreparedStatement stmt = connection.prepareStatement(query.toString())) {
