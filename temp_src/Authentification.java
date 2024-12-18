@@ -4,9 +4,16 @@ import java.sql.Timestamp;
 
 public class Authentification{
     int idAuthentification;
-    int codePin;
+    String codePin;
     Timestamp expirationPin;
     Utilisateur utilisateur;
+
+    public Authentification(int idAuthentification, String codePin, Timestamp expirationPin, Utilisateur utilisateur) {
+        this.idAuthentification = idAuthentification;
+        this.codePin = codePin;
+        this.expirationPin = expirationPin;
+        this.utilisateur = utilisateur;
+    }
 
     public int getIdAuthentification() {
         return idAuthentification;
@@ -14,10 +21,10 @@ public class Authentification{
     public void setIdAuthentification(int idAuthentification) {
         this.idAuthentification = idAuthentification;
     }
-    public int getCodePin() {
+    public String getCodePin() {
         return codePin;
     }
-    public void setCodePin(int codePin) {
+    public void setCodePin(String codePin) {
         this.codePin = codePin;
     }
     public Timestamp getExpirationPin() {
