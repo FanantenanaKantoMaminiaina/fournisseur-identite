@@ -178,7 +178,7 @@ public class Utilisateur{
         }
     
         if (columnsAdded == 0) {
-            throw new IllegalArgumentException("Aucune colonne valide à mettre à jour. Vérifiez vos paramètres.");
+            throw new IllegalArgumentException("Aucune colonne valide à mettre à jour. Verifiez vos paramètres.");
         }
     
         query.setLength(query.length() - 2);
@@ -199,7 +199,7 @@ public class Utilisateur{
     
             return stmt.executeUpdate();
         } catch (SQLException e) {
-            throw new SQLException("Erreur lors de l'exécution de la requête updateInfo: " + e.getMessage(), e);
+            throw new SQLException("Erreur lors de l'execution de la requête updateInfo: " + e.getMessage(), e);
         }
     }
 
@@ -228,7 +228,7 @@ public class Utilisateur{
                 }
             }
         } catch (SQLException e) {
-            throw new Exception("Erreur lors de la récupération de l'utilisateur par token: " + e.getMessage(), e);
+            throw new Exception("Erreur lors de la recuperation de l'utilisateur par token: " + e.getMessage(), e);
         }
     
         return utilisateur;
@@ -236,7 +236,7 @@ public class Utilisateur{
 
     public static Token getLastTokenByIdUtilisateur(int idUtilisateur, Connection connection) throws Exception {
         if (idUtilisateur <= 0) {
-            throw new IllegalArgumentException("L'idUtilisateur doit être supérieur à 0.");
+            throw new IllegalArgumentException("L'idUtilisateur doit être superieur à 0.");
         }
         String query = "SELECT id_token, token, expiration_token, id_utilisateur FROM token WHERE id_utilisateur = ? ORDER BY expiration_token DESC LIMIT 1";
         
@@ -257,7 +257,7 @@ public class Utilisateur{
                 }
             }
         } catch (SQLException e) {
-            throw new Exception("Erreur lors de la récupération du dernier token: " + e.getMessage(), e);
+            throw new Exception("Erreur lors de la recuperation du dernier token: " + e.getMessage(), e);
         }
         
         return null;
