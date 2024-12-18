@@ -11,6 +11,10 @@ CREATE TABLE utilisateur(
    email VARCHAR(180)  NOT NULL,
    mdp VARCHAR(256)  NOT NULL,
    PRIMARY KEY(id_utilisateur),
+   id_utilisateur SERIAL,
+   email VARCHAR(180)  NOT NULL,
+   mdp VARCHAR(256)  NOT NULL,
+   PRIMARY KEY(id_utilisateur),
    UNIQUE(email)
 );
 
@@ -26,20 +30,28 @@ CREATE TABLE token(
    expiration_token TIMESTAMP,
    id_utilisateur INTEGER NOT NULL,
    PRIMARY KEY(id_token),
+   id_utilisateur INTEGER NOT NULL,
+   PRIMARY KEY(id_token),
    UNIQUE(token),
+   FOREIGN KEY(id_utilisateur) REFERENCES utilisateur(id_utilisateur)
    FOREIGN KEY(id_utilisateur) REFERENCES utilisateur(id_utilisateur)
 );
 
 CREATE TABLE tentative(
+   id_tentative SERIAL,
    id_tentative SERIAL,
    nb SMALLINT,
    date_reconnexion TIMESTAMP,
    id_utilisateur INTEGER NOT NULL,
    PRIMARY KEY(id_tentative),
    FOREIGN KEY(id_utilisateur) REFERENCES utilisateur(id_utilisateur)
+   id_utilisateur INTEGER NOT NULL,
+   PRIMARY KEY(id_tentative),
+   FOREIGN KEY(id_utilisateur) REFERENCES utilisateur(id_utilisateur)
 );
 
 CREATE TABLE authentification(
+   id_authentification SERIAL,
    id_authentification SERIAL,
    code_pin VARCHAR(50) ,
    expiration_pin TIMESTAMP,
@@ -48,4 +60,10 @@ CREATE TABLE authentification(
    FOREIGN KEY(id_utilisateur) REFERENCES utilisateur(id_utilisateur)
 );
 
+CREATE TABLE configuration (
+    id_configuration SERIAL PRIMARY KEY,
+    duree_vie_token INT NOT NULL,
+    duree_vie_pin INT NOT NULL,
+    limite_tentative INT NOT NULL
+);
 SELECT t.nb FROM tentative t  JOIN utilisateur u ON t.id_utilisateur = u.id_utilisateur WHERE u.email='alice@gmail.com';

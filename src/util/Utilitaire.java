@@ -1,8 +1,10 @@
 package util;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.Random;
@@ -286,6 +288,28 @@ public class Utilitaire {
      */
     public static boolean isDateTime(String value) {
         return isValidFormat("yyyy-MM-dd HH:mm:ss", value);
+    }
+
+     /**
+     * Fonction pour obtenir la date et heure actuelle
+     * 
+     * @return Timestamp
+     */
+    public static Timestamp getNow() {
+        LocalDateTime now = LocalDateTime.now();
+        return Timestamp.valueOf(now);
+    }
+
+     /**
+     * Fonction pour ajouter un intervalle en secondes a un Timestamp
+     * 
+     * @param timestamp
+     * @param seconde
+     * @return Timestamp
+     */
+    public static Timestamp addSeconds(Timestamp timestamp, int seconds) {
+        long millisecondsToAdd = seconds * 1000L;
+        return new Timestamp(timestamp.getTime() + millisecondsToAdd);
     }
 
 // Fonction pour Email

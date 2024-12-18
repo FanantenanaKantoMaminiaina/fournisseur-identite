@@ -1,3 +1,4 @@
+
 package model;
 
 import java.sql.Connection;
@@ -11,9 +12,14 @@ public class Tentative{
     int nb;
     Timestamp dateReconnexion;
     Utilisateur utilisateur;
-    
-    public Tentative() {
+
+    public Tentative(int idTentative, int nb, Timestamp dateReconnexion, Utilisateur utilisateur) {
+        this.idTentative = idTentative;
+        this.dateReconnexion = dateReconnexion;
+        this.nb = nb;
+        this.utilisateur = utilisateur;
     }
+    
     public int getIdTentative() {
         return idTentative;
     }
@@ -39,7 +45,7 @@ public class Tentative{
         this.utilisateur = utilisateur;
     }
 
-      public int insererTentative(Connection connection) {
+    public int insererTentative(Connection connection) {
         String query = "INSERT INTO tentative (nb, date_reconnexion, id_utilisateur) VALUES (?, ?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, this.nb); 
@@ -51,7 +57,7 @@ public class Tentative{
             return 0; 
         }
     }
-    public void updateTentative(String email, int nbTentatives, Connection connection) {
+    public static void updateTentative(String email, int nbTentatives, Connection connection) {
         String query = "UPDATE tentative SET nb = ?, date_reconnexion = ? WHERE id_utilisateur = (SELECT id_utilisateur FROM utilisateur WHERE email = ?)";
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setInt(1, nbTentatives);
@@ -63,10 +69,11 @@ public class Tentative{
         }
     }
 
-    public int getNbTentativeParEmail(String email, Connection connection) {
-        String query = "SELECT t.nb FROM tentative t " +
-                    "JOIN utilisateur u ON t.id_utilisateur = u.id_utilisateur " +
-                    "WHERE u.email = ?";
+    public static int getNbTentativeParEmail(String email, Connection connection) {
+        String query = """ 
+                    SELECT t.nb FROM tentative t 
+                    JOIN utilisateur u ON t.id_utilisateur = u.id_utilisateur 
+                    WHERE u.email = ? """;
         try (PreparedStatement stmt = connection.prepareStatement(query)) {
             stmt.setString(1, email);
             ResultSet rs = stmt.executeQuery();
@@ -79,13 +86,11 @@ public class Tentative{
         return 0;
     }
 
-    public void deleteTentativesByEmail(String email, Connection connection) throws SQLException {
+    public static void deleteTentativesByEmail(String email, Connection connection) throws SQLException {
         String query = "DELETE FROM tentative WHERE id_utilisateur = (SELECT id_utilisateur FROM utilisateur WHERE email = ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, email);
             preparedStatement.executeUpdate();
         }
     }
-    
-
 }
