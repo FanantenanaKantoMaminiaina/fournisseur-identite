@@ -94,7 +94,7 @@ public class LoginApiController extends HttpServlet {
                         this.emailExpediteur,
                         this.passwordExpediteur,
                         utilisateur.getEmail(),
-                        "http://localhost:8080/fournisseur-identite/api/resetTentative?email=" + email
+                        UtilitaireAuthentification.getHtmlResetTentative("http://localhost:8080/fournisseur-identite/api/resetTentative?email=" + email)
                     );
                     response.getWriter().print(ApiResponse.error(401, "Trop de tentatives echouees. Compte temporairement bloque.", "http://localhost:8080/fournisseur-identite/api/resetTentative?email=" + email));
                     return;
@@ -116,7 +116,7 @@ public class LoginApiController extends HttpServlet {
                     this.emailExpediteur,
                     this.passwordExpediteur,
                     utilisateur.getEmail(),
-                    "http://localhost:8080/fournisseur-identite/api/resetTentative?email=" + email
+                    UtilitaireAuthentification.getHtmlResetTentative("http://localhost:8080/fournisseur-identite/api/resetTentative?email=" + email)
                 );
                 response.getWriter().print(ApiResponse.error(401, "Trop de tentatives echouees. Compte temporairement bloque.", "http://localhost:8080/fournisseur-identite/api/resetTentative?email=" + email));
                 return;
@@ -124,12 +124,12 @@ public class LoginApiController extends HttpServlet {
 
             String pin = UtilitaireAuthentification.generatePin(6);
             int validationPin = utilisateur.insertPin(connection, pin, this.duree_vie_pin);
-            
+
             boolean envoyePin = UtilitaireEnvoieEmail.envoyerEmail(
                 this.emailExpediteur,
                 this.passwordExpediteur,
                 utilisateur.getEmail(),
-                pin
+                UtilitaireAuthentification.getHtmlPin(pin, this.duree_vie_pin)
             );
 
             if(validationPin < 0 && !envoyePin){
