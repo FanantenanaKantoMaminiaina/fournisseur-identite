@@ -1,5 +1,7 @@
 package model;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -7,15 +9,23 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import util.Utilitaire;
 import util.UtilitaireAuthentification;
+import util.UtilitaireEnvoieEmail;
 
 public class Utilisateur{
     int idUtilisateur;
     String email;
     String mdp;
 
+    public Utilisateur() { }
+
     public Utilisateur(int idUtilisateur ,String email, String mdp) {
         this.setEmail(email);
         this.setIdUtilisateur(idUtilisateur);
+        this.setMdp(mdp);
+    }
+
+    public Utilisateur(String email, String mdp) {
+        this.setEmail(email);
         this.setMdp(mdp);
     }
 
@@ -54,7 +64,7 @@ public class Utilisateur{
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new Exception("Error while fetching Utilisateur", e);
+            throw new Exception("Erreur lors de la recuperation de l'utilisateur", e);
         }
         return utilisateur;
     }
@@ -108,7 +118,7 @@ public class Utilisateur{
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new Exception("Error while fetching Authentification", e);
+            throw new Exception("Erreur lors de la recuperation de l'authentification", e);
         }
         return authentification;
     }
@@ -155,18 +165,154 @@ public class Utilisateur{
         return affectedRows;
     }
 
-    public int updateInfo(String[] colName, String[] value, String token, Connection connection) {
+    // insertion 
+    private void inserer(Connection connection)throws SQLException{
+        String sql = "INSERT INTO utilisateur (email, mdp) " +
+                     "VALUES (?, ?)";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
+            preparedStatement.setString(1, this.email);
+            preparedStatement.setString(2, this.mdp);
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new SQLException("Erreur lors de l'insertion dans utilisateur_temp : " + e.getMessage());
+        }
+    }
+
+    // insertion temporaire dans utilisateur_temp
+    public String insererUtilisateurTemporaire(Connection connection) throws SQLException {
+        String sql = "INSERT INTO utilisateur_temp (email, mdp, validation_token, expiration_date) " +
+                     "VALUES (?, ?, ?, NOW() + INTERVAL '15 minutes')";
+    
+        String hashMdp = UtilitaireAuthentification.hashPassword(this.mdp);
+        String validationToken = UtilitaireAuthentification.generateRandomToken();
+        
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setString(1, this.email);
+            preparedStatement.setString(2, hashMdp);
+            preparedStatement.setString(3, validationToken);
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new SQLException("Erreur lors de l'insertion dans utilisateur_temp : " + e.getMessage());
+        }catch(Exception ex){
+            throw ex;
+        }
+        return validationToken;
+    }
+
+    private static String preparerEmailValidation(String validation_token) {
+        String htmlEmplacement = "../../assets/validationCompte.html";
+        
+        try {
+            // Lire le contenu du fichier HTML
+            String htmlContent = new String(Files.readAllBytes(Paths.get(htmlEmplacement)));
+
+            // Remplacer le token dans l'URL
+            String url = "http://localhost:8080/fournisseur-identite/api/inscription?validationToken=" + validation_token;
+            htmlContent = htmlContent.replace("http://localhost:8080/fournisseur-identite/api/inscription?validationToken=" + validation_token, url);
+
+            return htmlContent;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Erreur lors de la lecture du fichier HTML.";
+        }
+    }
+
+    // envoyer un email avec le lien de validation
+    private static void envoyerEmailValidation(String emailExpediteur, String password, String email,String validation_token)throws Exception{
+        try {
+            String emailContent = preparerEmailValidation(validation_token);
+            UtilitaireEnvoieEmail.envoyerEmail(emailExpediteur, password,email, emailContent);
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    // verifier le validation_token
+    private Utilisateur verifierToken(Connection conn, String validationToken) throws Exception {
+        String query = "SELECT * FROM utilisateur_temp WHERE validation_token = ? ";
+
+        String updateQuery = "UPDATE utilisateur_temp SET is_used = 'Y' WHERE id = ?";
+        Utilisateur util = null;
+
+        try (PreparedStatement selectStmt = conn.prepareStatement(query);
+            PreparedStatement updateStmt = conn.prepareStatement(updateQuery)) {
+            
+            selectStmt.setString(1, validationToken);
+
+            try (ResultSet rs = selectStmt.executeQuery()) {
+                if (rs.next()) {
+                    Timestamp expirationDate = rs.getTimestamp("expiration_date");
+
+                    if (rs.getString("is_used").equalsIgnoreCase("Y")) {
+                        throw new Exception("Votre compte a bien ete cree, Veuillez vous reconnecter");
+                    }
+                    if (expirationDate != null && expirationDate.before(Utilitaire.getNow())) {
+                        throw new Exception("Le token a expire");
+                    }
+
+                    String newEmail = rs.getString("email");
+                    String newMdp = rs.getString("mdp");
+
+                    updateStmt.setInt(1, rs.getInt("id"));
+                    updateStmt.executeUpdate();
+                    util = new Utilisateur( 1, newEmail, newMdp);
+                }
+            }
+        } catch (SQLException e) {
+            throw e;
+        }
+
+        if (util!=null) {
+            return util;
+        }else{
+            throw new Exception("Veuiller creer un compte!");
+        }
+    }
+
+    public void inscription(Connection connection ,String emailExpediteur, String password) throws Exception{
+        try {
+            String validationToken = this.insererUtilisateurTemporaire(connection);
+            envoyerEmailValidation(emailExpediteur, password, this.email, validationToken);            
+        } catch (Exception e) {
+           throw e;
+        }
+    }
+    
+    public void verifierEmail(Connection connection, String validationToken)throws Exception{
+        try {
+            Utilisateur util = verifierToken(connection, validationToken);
+            util.inserer(connection);
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+
+    public static int updateInfo(String[] colName, String[] value, String token, Connection connection) throws Exception {
         if (colName == null || value == null || colName.length != value.length || colName.length == 0) {
             throw new IllegalArgumentException("Les tableaux colName et value doivent être non nuls, de même longueur et non vides.");
         }
+        if (token == null || token.isEmpty()) {
+            throw new IllegalArgumentException("Le token doit être non nul et non vide.");
+        }
+    
         StringBuilder query = new StringBuilder("UPDATE utilisateur SET ");
+        int columnsAdded = 0; 
         for (int i = 0; i < colName.length; i++) {
             if ("email".equalsIgnoreCase(colName[i])) {
-                continue;
+                continue; 
             }
             query.append(colName[i]).append(" = ?, ");
+            columnsAdded++;
         }
-        query.setLength(query.length() - 2); 
+    
+        if (columnsAdded == 0) {
+            throw new IllegalArgumentException("Aucune colonne valide à mettre à jour. Verifiez vos paramètres.");
+        }
+    
+        query.setLength(query.length() - 2);
         query.append(" WHERE id_utilisateur = (SELECT id_utilisateur FROM token WHERE token = ?)");
         try (PreparedStatement stmt = connection.prepareStatement(query.toString())) {
             int index = 1;
@@ -174,13 +320,77 @@ public class Utilisateur{
                 if ("email".equalsIgnoreCase(colName[i])) {
                     continue; 
                 }
-                stmt.setString(index++, value[i]);
+                String valueToSet = value[i];
+                if ("mdp".equalsIgnoreCase(colName[i])) {
+                    valueToSet = UtilitaireAuthentification.hashPassword(value[i]);
+                }
+                stmt.setString(index++, valueToSet); 
             }
             stmt.setString(index, token); 
+    
             return stmt.executeUpdate();
         } catch (SQLException e) {
-            e.printStackTrace();
-            return 0; 
+            throw new SQLException("Erreur lors de l'execution de la requête updateInfo: " + e.getMessage(), e);
         }
+    }
+
+    public static Utilisateur getUserByToken(Connection connection, String token) throws Exception {
+        if (token == null || token.isEmpty()) {
+            throw new IllegalArgumentException("Le token doit être non nul et non vide.");
+        }
+    
+        Utilisateur utilisateur = null;
+        String query = "SELECT u.id_utilisateur, u.email, u.mdp " +
+                       "FROM utilisateur u " +
+                       "INNER JOIN token t ON u.id_utilisateur = t.id_utilisateur " +
+                       "WHERE t.token = ? AND t.expiration_token > ?";
+    
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, token);
+            statement.setTimestamp(2, Utilitaire.getNow());
+    
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    utilisateur = new Utilisateur(
+                        resultSet.getInt("id_utilisateur"),
+                        resultSet.getString("email"),
+                        resultSet.getString("mdp")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            throw new Exception("Erreur lors de la recuperation de l'utilisateur par token: " + e.getMessage(), e);
+        }
+    
+        return utilisateur;
+    }
+
+    public static Token getLastTokenByIdUtilisateur(int idUtilisateur, Connection connection) throws Exception {
+        if (idUtilisateur <= 0) {
+            throw new IllegalArgumentException("L'idUtilisateur doit être superieur à 0.");
+        }
+        String query = "SELECT id_token, token, expiration_token, id_utilisateur FROM token WHERE id_utilisateur = ? ORDER BY expiration_token DESC LIMIT 1";
+        
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, idUtilisateur); 
+            
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    Token token = new Token();
+                    token.setToken(resultSet.getString("token"));
+                    token.setExpirationToken(resultSet.getTimestamp("expiration_token"));
+                    token.setIdToken(resultSet.getInt("id_token"));
+                    Utilisateur utilisateur =new Utilisateur();
+                    utilisateur.setIdUtilisateur(idUtilisateur);
+                    token.setUtilisateur(utilisateur);
+    
+                    return token; 
+                }
+            }
+        } catch (SQLException e) {
+            throw new Exception("Erreur lors de la recuperation du dernier token: " + e.getMessage(), e);
+        }
+        
+        return null;
     }
 }

@@ -3,9 +3,10 @@ package util;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-// import java.util.Properties;
-// import jakarta.mail.*;
-// import jakarta.mail.internet.*;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 public class UtilitaireAuthentification{
 
@@ -58,34 +59,27 @@ public class UtilitaireAuthentification{
         return hashPassword(passwordInput).equals(passwordHashe);
     }
 
-    // private void sendPinByEmail(String senderEmail, String senderPassword, String recipientEmail, String pinCode) {
-    //     final String host = "smtp.gmail.com";
-    //     final int port = 587;
+    public  static String extractToken(HttpServletRequest request, String headerName) {
+        String headerValue = request.getHeader(headerName);
+        if (headerValue == null || headerValue.isEmpty()) {
+            return null; 
+        }        
+        if (headerValue.startsWith("Bearer ")) {
+            return headerValue.substring(7);
+        }
+        return headerValue;
+    }
 
-    //     Properties props = new Properties();
-    //     props.put("mail.smtp.auth", "true");
-    //     props.put("mail.smtp.starttls.enable", "true");
-    //     props.put("mail.smtp.host", host);
-    //     props.put("mail.smtp.port", port);
-
-    //     Session session = Session.getInstance(props, new Authenticator() {
-    //         protected PasswordAuthentication getPasswordAuthentication() {
-    //             return new PasswordAuthentication(senderEmail, senderPassword);
-    //         }
-    //     });
-
-    //     try {
-    //         Message message = new MimeMessage(session);
-    //         message.setFrom(new InternetAddress(senderEmail));
-    //         message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
-    //         message.setSubject("Votre code PIN d'authentification");
-    //         message.setText("Bonjour,\n\nVotre code PIN est : " + pinCode + "\n\nMerci!");
-
-    //         Transport.send(message);
-    //         System.out.println("Email envoyé avec succès à " + recipientEmail);
-    //     } catch (MessagingException e) {
-    //         e.printStackTrace();
-    //         System.out.println("Échec de l'envoi de l'email.");
-    //     }
-    // }
+    public  static  boolean verifyHeader(HttpServletRequest request, HttpServletResponse response, String headerName) throws IOException {
+        String headerValue = request.getHeader(headerName);
+        if (headerValue == null || headerValue.isEmpty()) {
+            response.getWriter().print(ApiResponse.error(401, "Non autorise", "header invalide ou manquant: " + headerName));
+            return false; 
+        }
+        if (!headerValue.startsWith("Bearer ")) {
+            response.getWriter().print(ApiResponse.error(401, "Non autorise", "format de token invalide dans l'header: " + headerName));
+            return false;
+        }
+        return true; 
+    }
 }
