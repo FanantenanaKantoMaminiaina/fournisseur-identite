@@ -18,38 +18,46 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import model.Tentative;
-import model.Configuration;
 import util.ApiResponse;
+import util.PropertiesLoader;
 
 @WebServlet("/api/resetTentative")
 public class ResetTentativeApiController extends HttpServlet {
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("application/json");
 
+    private String propertiesPath = "database.properties";
+    private String emailExpediteur;
+    private String passwordExpediteur;
+
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        chargerConfigurations();
+    }
+
+    private void chargerConfigurations() {
+        try {
+            PropertiesLoader loader = new PropertiesLoader(this.propertiesPath);
+            this.emailExpediteur = loader.getProperty("emailExpediteur");
+            this.passwordExpediteur = loader.getProperty("passwordExpediteur");
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors du chargement des configurations : " + e.getMessage(), e);
+        }
+    }
+
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        response.setContentType("application/json");
+        String email = request.getParameter("email");
         Connection connection = null;
 
         try {
             connection = Connexion.connect();
 
-            Configuration configuration = Configuration.getConfiguration(connection);
-
-            StringBuilder jsonBuffer = new StringBuilder();
-            String line;
-            try (BufferedReader reader = request.getReader()) {
-                while ((line = reader.readLine()) != null) {
-                    jsonBuffer.append(line);
-                }
-            }
-
-            JsonObject jsonRequest = new Gson().fromJson(jsonBuffer.toString(), JsonObject.class);
-
-            if (!jsonRequest.has("email")) {
-                response.getWriter().print(ApiResponse.error(400, "Email is required", null));
+            if (email==null ) {
+                response.getWriter().print(ApiResponse.error(400, "email est obligatoire", null));
                 return;
             }
-
-            String email = jsonRequest.get("email").getAsString();
 
             Tentative.deleteTentativesByEmail(email, connection);
 
@@ -59,14 +67,14 @@ public class ResetTentativeApiController extends HttpServlet {
             response.getWriter().print(ApiResponse.success(data));
 
             connection.commit();
-        } catch (IOException | SQLException ex) {
-            response.getWriter().print(ApiResponse.error(500, "Internal Server Error", ex.getMessage()));
+        } catch (Exception ex) {
+            response.getWriter().print(ApiResponse.error(500, "Erreur interne du serveur ", ex.getMessage()));
         } finally {
             if (connection != null) {
                 try {
                     connection.close();
                 } catch (SQLException e) {
-                    response.getWriter().print(ApiResponse.error(500, "Error connection", e.getMessage()));
+                    response.getWriter().print(ApiResponse.error(500, "Erreur de connection", e.getMessage()));
                 }
             }
         }

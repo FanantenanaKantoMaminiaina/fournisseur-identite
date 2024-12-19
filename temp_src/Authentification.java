@@ -8,6 +8,8 @@ public class Authentification{
     Timestamp expirationPin;
     Utilisateur utilisateur;
 
+    public Authentification() { }
+
     public Authentification(int idAuthentification, String codePin, Timestamp expirationPin, Utilisateur utilisateur) {
         this.idAuthentification = idAuthentification;
         this.codePin = codePin;

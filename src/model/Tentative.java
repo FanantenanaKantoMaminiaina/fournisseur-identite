@@ -13,6 +13,8 @@ public class Tentative{
     Timestamp dateReconnexion;
     Utilisateur utilisateur;
 
+    public Tentative() { }
+
     public Tentative(int idTentative, int nb, Timestamp dateReconnexion, Utilisateur utilisateur) {
         this.idTentative = idTentative;
         this.dateReconnexion = dateReconnexion;

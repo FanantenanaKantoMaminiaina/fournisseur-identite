@@ -67,21 +67,21 @@ public class UpdateCompteApiController extends HttpServlet {
             Token token=Token.isValidToken(UtilitaireAuthentification.extractToken(request,"Authorization"), connection);
             
             if(token==null){
-                response.getWriter().write(ApiResponse.error(500, "token invalide", null));
+                response.getWriter().write(ApiResponse.error(500, "token est invalide", null));
                 return;
             }
             Utilisateur.updateInfo(keyArray,valueArray,token.getToken(),connection);
             connection.commit();
-            response.getWriter().write(ApiResponse.success(data+" mis a jour avec succes!!!"));
+            response.getWriter().write(ApiResponse.success(data+" mis a jour avec succes!"));
 
         } catch (Exception ex) {
-            response.getWriter().print(ApiResponse.error(500, "Internal Server Error", ex.getMessage()));
+            response.getWriter().print(ApiResponse.error(500, "Erreur interne du Server", ex.getMessage()));
         } finally {
             if (connection != null) {
                 try {
                     connection.close();
                 } catch (SQLException e) {
-                    response.getWriter().print(ApiResponse.error(500, "Error connection", e.getMessage()));
+                    response.getWriter().print(ApiResponse.error(500, "Erreur de connection", e.getMessage()));
                 }
             }
         }

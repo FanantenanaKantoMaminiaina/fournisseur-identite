@@ -19,13 +19,38 @@ import java.sql.SQLException;
 
 import model.Tentative;
 import model.Utilisateur;
-import model.Configuration;
 import util.ApiResponse;
 import util.Utilitaire;
 import util.UtilitaireAuthentification;
+import util.UtilitaireEnvoieEmail;
+import util.PropertiesLoader;
 
 @WebServlet("/api/login")
 public class LoginApiController extends HttpServlet {
+    
+    private int limite_tentative;
+    private int duree_vie_pin;
+    private String emailExpediteur;
+    private String passwordExpediteur;
+
+    @Override
+    public void init() throws ServletException {
+        super.init();
+        chargerConfigurations();
+    }
+
+    private void chargerConfigurations() {
+        try {
+            PropertiesLoader loader = new PropertiesLoader("database.properties");
+            this.limite_tentative = Integer.parseInt(loader.getProperty("limite_tentative"));
+            this.duree_vie_pin = Integer.parseInt(loader.getProperty("duree_vie_pin"));
+            this.emailExpediteur = loader.getProperty("emailExpediteur");
+            this.passwordExpediteur = loader.getProperty("passwordExpediteur");
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors du chargement des configurations : " + e.getMessage(), e);
+        }
+    }
+
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -37,8 +62,6 @@ public class LoginApiController extends HttpServlet {
         try {
             connection = Connexion.connect();
 
-            Configuration configuration = Configuration.getConfiguration(connection);
-
             StringBuilder jsonBuffer = new StringBuilder();
             String line;
             try (BufferedReader reader = request.getReader()) {
@@ -49,25 +72,31 @@ public class LoginApiController extends HttpServlet {
 
             JsonObject jsonRequest = new Gson().fromJson(jsonBuffer.toString(), JsonObject.class);
 
-            if (!jsonRequest.has("email") || !jsonRequest.has("password")) {
-                response.getWriter().print(ApiResponse.error(400, "Email and password are required", null));
+            if (!jsonRequest.has("email") || !jsonRequest.has("mdp")) {
+                response.getWriter().print(ApiResponse.error(400, "email et mdp sont obligatoires", null));
                 return;
             }
 
             String email = jsonRequest.get("email").getAsString();
-            String password = jsonRequest.get("password").getAsString();
+            String mdp = jsonRequest.get("mdp").getAsString();
 
             Utilisateur utilisateur = Utilisateur.getUserByEmail(connection, email);
 
             if (utilisateur == null) {
-                response.getWriter().print(ApiResponse.error(401, "User invalid. Verify your email", null));
+                response.getWriter().print(ApiResponse.error(401, "Aucun utilisateur,verifier votre email", null));
                 return;
             }
 
-            if (!utilisateur.isValidPassword(password)) {
+            if (!utilisateur.isValidPassword(mdp)) {
                 int nbTentative = Tentative.getNbTentativeParEmail(email, connection);
-                if (nbTentative >= configuration.getLimiteTentative() ) {
-                    response.getWriter().print(ApiResponse.error(401, "Trop de tentatives echouees. Compte temporairement bloque.", "/api/resetTentatives?email=" + email));
+                if (nbTentative >= this.limite_tentative ) {
+                    boolean envoyeEmail = UtilitaireEnvoieEmail.envoyerEmail(
+                        this.emailExpediteur,
+                        this.passwordExpediteur,
+                        utilisateur.getEmail(),
+                        UtilitaireAuthentification.getHtmlResetTentative("http://localhost:8080/fournisseur-identite/api/resetTentative?email=" + email)
+                    );
+                    response.getWriter().print(ApiResponse.error(401, "Trop de tentatives echouees. Compte temporairement bloque.", "http://localhost:8080/fournisseur-identite/api/resetTentative?email=" + email));
                     return;
                 }
 
@@ -80,35 +109,48 @@ public class LoginApiController extends HttpServlet {
 
                 connection.commit();
 
-                response.getWriter().print(ApiResponse.error(401, "Invalid credentials. Password invalid", null));
+                response.getWriter().print(ApiResponse.error(401, "mdp est invalide", null));
                 return;
-            }else if(utilisateur.isValidPassword(password) && Tentative.getNbTentativeParEmail(email, connection) >= configuration.getLimiteTentative() ){
-                response.getWriter().print(ApiResponse.error(401, "Trop de tentatives echouees. Compte temporairement bloque.", "/api/resetTentatives?email=" + email));
+            }else if(utilisateur.isValidPassword(mdp) && Tentative.getNbTentativeParEmail(email, connection) >= this.limite_tentative ){
+                boolean envoyeEmail = UtilitaireEnvoieEmail.envoyerEmail(
+                    this.emailExpediteur,
+                    this.passwordExpediteur,
+                    utilisateur.getEmail(),
+                    UtilitaireAuthentification.getHtmlResetTentative("http://localhost:8080/fournisseur-identite/api/resetTentative?email=" + email)
+                );
+                response.getWriter().print(ApiResponse.error(401, "Trop de tentatives echouees. Compte temporairement bloque.", "http://localhost:8080/fournisseur-identite/api/resetTentative?email=" + email));
                 return;
             }
 
             String pin = UtilitaireAuthentification.generatePin(6);
-            int validationPin = utilisateur.insertPin(connection, pin, configuration.getDureeViePin());
-            
-            if(validationPin < 0){
-                response.getWriter().print(ApiResponse.error(401, "Error to generate PIN",null));
+            int validationPin = utilisateur.insertPin(connection, pin, this.duree_vie_pin);
+
+            boolean envoyePin = UtilitaireEnvoieEmail.envoyerEmail(
+                this.emailExpediteur,
+                this.passwordExpediteur,
+                utilisateur.getEmail(),
+                UtilitaireAuthentification.getHtmlPin(pin, this.duree_vie_pin)
+            );
+
+            if(validationPin < 0 && !envoyePin){
+                response.getWriter().print(ApiResponse.error(401, "Errur pour la generation de pin",null));
                 return;
             }
 
             Map<String, String> data = new HashMap<>();
-            data.put("message", "Verify your email and authenticate with PIN");
+            data.put("message", "Login effectue,verifier votre email pour s'authentifier avec pin");
 
             response.getWriter().print(ApiResponse.success(data));
             
             connection.commit();
         } catch (Exception ex) {
-            response.getWriter().print(ApiResponse.error(500, "Internal Server Error", ex.getMessage()));
+            response.getWriter().print(ApiResponse.error(500, "Erreur interne du serveur , EMAIL = " +this.emailExpediteur + " ,MDP = " +this.passwordExpediteur, ex.getMessage()));
         } finally {
             if (connection != null) {
                 try {
                     connection.close();
                 } catch (SQLException e) {
-                    response.getWriter().print(ApiResponse.error(500, "Error connection", e.getMessage()));
+                    response.getWriter().print(ApiResponse.error(500, "Erreur de connection", e.getMessage()));
                 }
             }
         }

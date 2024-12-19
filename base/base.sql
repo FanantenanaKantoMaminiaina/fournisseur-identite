@@ -60,10 +60,14 @@ CREATE TABLE authentification(
    FOREIGN KEY(id_utilisateur) REFERENCES utilisateur(id_utilisateur)
 );
 
-CREATE TABLE configuration (
-    id_configuration SERIAL PRIMARY KEY,
-    duree_vie_token INT NOT NULL,
-    duree_vie_pin INT NOT NULL,
-    limite_tentative INT NOT NULL
+CREATE TABLE utilisateur_temp(
+   id SERIAL,
+   email VARCHAR(50)  NOT NULL,
+   mdp VARCHAR(256) NOT NULL,
+   validation_token TEXT NOT NULL,
+   expiration_date TIMESTAMP,
+   is_used VARCHAR(1) DEFAULT 'N',
+   PRIMARY KEY(id),
+   UNIQUE(email),
+   UNIQUE(validation_token)
 );
-SELECT t.nb FROM tentative t  JOIN utilisateur u ON t.id_utilisateur = u.id_utilisateur WHERE u.email='alice@gmail.com';

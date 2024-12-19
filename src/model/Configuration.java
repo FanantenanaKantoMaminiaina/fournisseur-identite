@@ -12,13 +12,14 @@ public class Configuration {
     private int dureeViePin;
     private int limiteTentative;
 
+    public Configuration() { }
+
     public Configuration( int idConfiguration, int dureeVieToken, int dureeViePin, int limiteTentative) {
         this.idConfiguration = idConfiguration;
         this.dureeViePin = dureeViePin;
         this.dureeVieToken = dureeVieToken;
         this.limiteTentative = limiteTentative;
     }
-
 
     public int getIdConfiguration() {
         return idConfiguration;

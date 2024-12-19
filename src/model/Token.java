@@ -1,15 +1,16 @@
-
 package model;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.Timestamp;
-import util.*;
+import util.Utilitaire;
+
 public class Token{
     int idToken;
     String token;
     Timestamp expirationToken;
     Utilisateur utilisateur;
+
+    public Token(){ }
 
     public int getIdToken() {
         return idToken;
@@ -36,7 +37,7 @@ public class Token{
         this.utilisateur = utilisateur;
     }
 
-  public static Token isValidToken(String token, Connection connection) throws Exception {
+    public static Token isValidToken(String token, Connection connection) throws Exception {
         try {
             Utilisateur utilisateur = Utilisateur.getUserByToken(connection, token);
             if (utilisateur != null) {
@@ -50,5 +51,4 @@ public class Token{
         }
         return null;
     }
-
 }
