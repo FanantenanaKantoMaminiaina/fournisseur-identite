@@ -1,6 +1,7 @@
 # fournisseur-identite
 
--Inserer manuelement les tables dans le repertoire ./base
+-Pour lancer le projet:
+    lancer la commande : docker-compose up -d
 
 -Pour la configuration:
     -Il y a la :
