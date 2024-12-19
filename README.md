@@ -13,7 +13,7 @@
     Tout ses configuration peuvent etre modifiees dans le ./conf/database.properties
 
 
--Voici les api que vous pouvez utiliser:
+-Voici le guide d'utilisation des api:
     Inscription:
         -POST : http://localhost:8080/fournisseur-identite/api/inscription:
             Body:
@@ -21,24 +21,32 @@
                     "email":"admin@gmail.com",
                     "mdp":"admin"
                 }
+        Si l'inscription est correcte,il y a une message dans l'email pour valider l'inscription
+        
+        Voici une exemple de lien dans l'email pour la validation d'inscription
         -GET :  http://localhost:8080/fournisseur-identite/api/inscription?validationToken=7d7df842675ffc66c4e043eb52b27f2f33ab984c1a78ad9c7e9f48adea00b5fc
 
-    Login:
+
+    Authentification:
         -POST : http://localhost:8080/fournisseur-identite/api/login
             Body:
                 {
                     "email":"admin@gmail.com",
                     "mdp":"admin"
                 }
+            Si le login est valide,il y a une email envoye au personne qui essaie de se connecter contenant un code pin pour confirmer son authentification.
 
-    Authentification:
+
+    Confirmation Authentification(Avec code PIN):
         -POST : http://localhost:8080/fournisseur-identite/api/authentification
             Body:
                 {
                     "email":"admin@gmail.com",
                     "pin":"506967"
                 }
-        
+        Si l’authentification est validée : il y a une token générée.
+
+
     Gestion de compte:
         -POST : http://localhost:8080/fournisseur-identite/api/updateCompte
             Body:
@@ -47,6 +55,12 @@
                 }
             Authorisation:
                 Bearer Token : 0426c7e801ea72827e2fa9c25204bae19fc29af4e82ce9271258514266de4326
+        Pour modifer les informations (Ici , le mdp ) : 
+        Il faut ajouter dans l'header le token genere pour l'utilisateur dans l'authentification
+
 
     Reinitialisation Tentative:
         -GET :  http://localhost:8080/fournisseur-identite/api/resetTentative?email=admin@gmail.com
+
+        Si le compte est bloque(le nombre de tentative depasse la limite) : 
+        Il y a une message envoyee dans l'email pour le reinitialiser 
