@@ -134,7 +134,9 @@ public class AuthentificationApiController extends HttpServlet {
             }
 
             Map<String, String> data = new HashMap<>();
+            data.put("email", utilisateur.getEmail());
             data.put("token", token);
+            data.put("expirationToken", expirationToken.toString());
 
             response.getWriter().print(ApiResponse.success(data));
             connection.commit();
