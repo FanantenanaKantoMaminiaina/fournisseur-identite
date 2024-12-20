@@ -7,8 +7,8 @@
 
 -Pour la configuration:
     -Il y a la :
-        -duree_vie_token
-        -duree_vie_pin
+        -duree_vie_token (En seconde)
+        -duree_vie_pin (En seconde)
         -limite_tentative
         -emailExpediteur
         -passwordExpediteur
@@ -16,7 +16,7 @@
     Tout ses configuration peuvent etre modifiees dans le ./conf/database.properties
 
     Si vous modifiez la conf:
-    lancer la commande : 
+    lancer les commandes suivantes: 
         -docker-compose down -v
         -docker-compose build --no-cache
         -docker-compose up -d
