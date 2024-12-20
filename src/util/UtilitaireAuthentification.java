@@ -135,7 +135,6 @@ public class UtilitaireAuthentification{
                 + "<p>Lien postman : <strong style=\"color: red\">" + lien + "</strong></p>"
                 + "<p>Si vous n'avez pas demande cette reinitialisation, ignorez cet email.</p>"
                 + "<p>Merci,</p>"
-                + "<p>L'equipe [Nom de votre application]</p>"
                 + "</div>"
                 + "</body>"
                 + "</html>";
@@ -165,7 +164,6 @@ public class UtilitaireAuthentification{
                 + "<p>Lien postman : <strong style=\"color: red\">" + lien + "</strong></p>"
                 + "<p>Si vous n'avez pas demande cette validation, veuillez ignorer cet email.</p>"
                 + "<p>Merci,</p>"
-                + "<p>L'equipe [Nom de votre application]</p>"
                 + "</div>"
                 + "</body>"
                 + "</html>";

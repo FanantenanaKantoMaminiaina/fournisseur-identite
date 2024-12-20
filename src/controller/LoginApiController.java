@@ -133,7 +133,7 @@ public class LoginApiController extends HttpServlet {
             );
 
             if(validationPin < 0 && !envoyePin){
-                response.getWriter().print(ApiResponse.error(401, "Errur pour la generation de pin",null));
+                response.getWriter().print(ApiResponse.error(401, "Erreur pour la generation de pin",null));
                 return;
             }
 

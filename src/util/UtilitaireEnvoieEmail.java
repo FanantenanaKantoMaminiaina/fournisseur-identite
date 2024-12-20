@@ -30,7 +30,7 @@ public class UtilitaireEnvoieEmail {
             MimeMessage message = new MimeMessage(session);
             message.setFrom(new InternetAddress(emailExpediteur));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email));
-            message.setSubject("Email avec HTML, CSS et images integrees");
+            message.setSubject("Fournisseur d identite");
 
             // Creation de MimeMultipart avec le type "related"
             MimeMultipart multipart = new MimeMultipart("related");

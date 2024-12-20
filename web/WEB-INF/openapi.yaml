@@ -1,0 +1,500 @@
+openapi: 3.0.0
+info:
+  title: API de Gestion des Utilisateurs
+  description: Documentation de l'API pour l'inscription et l'authentification des utilisateurs.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/fournisseur-identite
+paths:
+  /api/inscription:
+    post:
+      summary: Inscription d'un utilisateur
+      description: Cette méthode permet à un utilisateur de s'inscrire avec une adresse e-mail et un mot de passe. Une validation par e-mail est nécessaire.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: Adresse e-mail de l'utilisateur.
+                  example: user@example.com
+                mdp:
+                  type: string
+                  format: password
+                  description: Mot de passe de l'utilisateur.
+                  example: Password123
+      responses:
+        "200":
+          description: Inscription réussie.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "Votre compte est en attente de validation, veuillez valider votre email!"
+        "400":
+          description: Erreur de validation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 400
+                      message:
+                        type: string
+                        example: "email et mdp sont obligatoires"
+        "500":
+          description: Erreur interne du serveur
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 500
+                      message:
+                        type: string
+                        example: "Erreur interne de serveur"
+
+    get:
+      summary: Validation d'un compte utilisateur
+      description: Valide un compte utilisateur en utilisant un token de validation envoyé par e-mail.
+      parameters:
+        - name: validationToken
+          in: query
+          required: true
+          description: Token de validation envoyé à l'utilisateur.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Validation réussie.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "Votre compte a bien ete crée, veuillez vous connecter!"
+        "400":
+          description: Token de Validation Manquante
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 400
+                      message:
+                        type: string
+                        example: "validationToken est obligatoire"
+        "500":
+          description: Erreur interne du serveur
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 500
+                      message:
+                        type: string
+                        example: "Erreur interne de serveur"
+  /api/login:
+    post:
+      summary: "Effectuer une connexion"
+      description: >
+        Cet endpoint permet à un utilisateur de se connecter avec un email et un mot de passe.
+        Si le mot de passe est valide, un code PIN temporaire est généré et envoyé par email à l'utilisateur.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - mdp
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "utilisateur@example.com"
+                  description: "Adresse email de l'utilisateur."
+                mdp:
+                  type: string
+                  example: "password123"
+                  description: "Mot de passe de l'utilisateur."
+      responses:
+        "200":
+          description: "Connexion réussie, PIN envoyé par email."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "Login effectue,verifier votre email pour s'authentifier avec pin"
+        "400":
+          description: Erreur de validation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 400
+                      message:
+                        type: string
+                        example: "email et mdp sont obligatoires"
+        "401":
+          description: "Erreur d'authentification ou compte bloqué."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  message:
+                    type: string
+                    example: "mdp est invalide"
+                  data:
+                    type: string
+                    nullable: true
+                    example: "http://localhost:8080/fournisseur-identite/api/resetTentative?email=utilisateur@example.com"
+        "500":
+          description: Erreur interne du serveur
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 500
+                      message:
+                        type: string
+                        example: "Erreur interne de serveur"
+
+  /api/authentification:
+    post:
+      summary: Authentification d'un utilisateur
+      description: Authentifie un utilisateur en vérifiant son e-mail et un code PIN temporaire.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: Adresse e-mail de l'utilisateur.
+                  example: user@example.com
+                pin:
+                  type: string
+                  description: Code PIN temporaire envoyé à l'utilisateur.
+                  example: "123456"
+      responses:
+        "200":
+          description: Authentification réussie avec génération d'un token d'accès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+        "400":
+          description: Erreur de validation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 400
+                      message:
+                        type: string
+                        example: "email et mdp sont obligatoires champ manquant ou invalide"
+        "401":
+          description: Authentification échouée (code PIN invalide, expiré, ou utilisateur non trouvé).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 401
+                      message:
+                        type: string
+                        example: "code PIN invalide, expiré, ou utilisateur non trouvé"
+        "500":
+          description: Erreur interne du serveur
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 500
+                      message:
+                        type: string
+                        example: "Erreur interne de serveur"
+  /api/resetTentative:
+    get:
+      summary: "Réinitialiser les tentatives de connexion"
+      description: >
+        Cet endpoint permet de réinitialiser les tentatives de connexion pour un utilisateur donné en fonction de son adresse email.
+      parameters:
+        - in: query
+          name: email
+          required: true
+          schema:
+            type: string
+            format: email
+            example: "utilisateur@example.com"
+          description: "Adresse email de l'utilisateur dont les tentatives doivent être réinitialisées."
+      responses:
+        "200":
+          description: "Réinitialisation des tentatives réussie."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        example: "Tentatives reinitialisees avec succes."
+        "400":
+          description: "L'email est manquant."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  message:
+                    type: string
+                    example: "email est obligatoire"
+        "500":
+          description: Erreur interne du serveur
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 500
+                      message:
+                        type: string
+                        example: "Erreur interne de serveur"
+  /api/updateCompte:
+    put:
+      summary: "Mettre à jour les informations du compte utilisateur"
+      description: >
+        Cet endpoint permet de mettre à jour les informations d'un utilisateur connecté, comme son nom, email, ou toute autre information associée.  
+        Une autorisation via un token est requise dans l'en-tête de la requête.
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+            example: "Bearer <token>"
+          description: >
+            Token d'autorisation valide pour authentifier la requête.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties:
+                type: string
+            example:
+              mdp: "admin"
+            description: >
+              JSON contenant les paires clé-valeur des champs à mettre à jour.  
+              Chaque clé représente un champ utilisateur, et la valeur correspondante est la nouvelle donnée.
+      responses:
+        "200":
+          description: "Mise à jour effectuée avec succès."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  data:
+                    type: string
+                    example: "Mise a jour avec succes!"
+        "400":
+          description: "Requête invalide ou en-tête manquant."
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "error"
+                  message:
+                    type: string
+                    example: "Authorization header manquant ou incorrect."
+        "500":
+          description: Erreur interne du serveur
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: integer
+                        example: 500
+                      message:
+                        type: string
+                        example: "Erreur interne de serveur"
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: integer
+              example: 400
+            message:
+              type: string
+              example: "Erreur de validation : champs manquants."
+            details:
+              type: string
+              example: null
