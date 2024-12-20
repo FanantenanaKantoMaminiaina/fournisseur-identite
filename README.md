@@ -2,8 +2,7 @@
 
 -Pour lancer le projet:
     lancer la commande : 
-        -docker-compose build --no-cache
-        -docker-compose up -d
+        -docker-compose up --build -d
 
 -Pour la configuration:
     -Il y a la :
@@ -17,9 +16,8 @@
 
     Si vous modifiez la conf:
     lancer les commandes suivantes: 
-        -docker-compose down -v
-        -docker-compose build --no-cache
-        -docker-compose up -d
+        -docker-compose up --build -d
+
 
 -Voici le guide d'utilisation des api:
     Inscription:
