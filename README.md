@@ -1,7 +1,9 @@
 # fournisseur-identite
 
 -Pour lancer le projet:
-    lancer la commande : docker-compose up -d
+    lancer la commande : 
+        -docker-compose build --no-cache
+        -docker-compose up -d
 
 -Pour la configuration:
     -Il y a la :
@@ -13,6 +15,11 @@
     
     Tout ses configuration peuvent etre modifiees dans le ./conf/database.properties
 
+    Si vous modifiez la conf:
+    lancer la commande : 
+        -docker-compose down -v
+        -docker-compose build --no-cache
+        -docker-compose up -d
 
 -Voici le guide d'utilisation des api:
     Inscription:
@@ -49,7 +56,7 @@
 
 
     Gestion de compte:
-        -POST : http://localhost:8080/fournisseur-identite/api/updateCompte
+        -PUT : http://localhost:8080/fournisseur-identite/api/updateCompte
             Body:
                 {
                     "mdp":"adminadmin"

@@ -404,7 +404,7 @@ paths:
                         type: string
                         example: "Erreur interne de serveur"
   /api/updateCompte:
-    post:
+    put:
       summary: "Mettre à jour les informations du compte utilisateur"
       description: >
         Cet endpoint permet de mettre à jour les informations d'un utilisateur connecté, comme son nom, email, ou toute autre information associée.  
