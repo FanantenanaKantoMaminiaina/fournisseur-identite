@@ -7,8 +7,10 @@ src="./src"
 lib="./lib"
 web="./web"
 bin="./bin"
+conf="./conf"
 tempjava="./tempjava"
 
+rm -f "../../tomcat/webapps/$appName"
 rm -rf "$temp"
 rm -rf "$tempjava"
 
@@ -50,6 +52,12 @@ if [ -d "$bin" ]; then
     cp -r "$bin"/* "$temp/WEB-INF/classes"
 else
     echo "Aucun fichier compilé trouvé dans $bin"
+fi
+
+if [ -d "$conf" ]; then
+    cp -r "$conf"/* "$temp/WEB-INF/classes"
+else
+    echo "Aucun fichier compilé trouvé dans $conf"
 fi
 
 cd "$temp" && jar -cvf "../$appName.war" *

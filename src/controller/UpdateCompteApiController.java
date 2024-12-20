@@ -33,7 +33,7 @@ import util.UtilitaireAuthentification;
 public class UpdateCompteApiController extends HttpServlet {
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType("application/json");
 
         if (!UtilitaireAuthentification.verifyHeader(request, response, "Authorization")) {

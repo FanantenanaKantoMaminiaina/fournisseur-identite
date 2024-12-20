@@ -1,17 +1,22 @@
 # fournisseur-identite
 
 -Pour lancer le projet:
-    lancer la commande : docker-compose up -d
+    lancer la commande : 
+        -docker-compose up --build -d
 
 -Pour la configuration:
     -Il y a la :
-        -duree_vie_token
-        -duree_vie_pin
+        -duree_vie_token (En seconde)
+        -duree_vie_pin (En seconde)
         -limite_tentative
         -emailExpediteur
         -passwordExpediteur
     
     Tout ses configuration peuvent etre modifiees dans le ./conf/database.properties
+
+    Si vous modifiez la conf:
+    lancer les commandes suivantes: 
+        -docker-compose up --build -d
 
 
 -Voici le guide d'utilisation des api:
@@ -49,7 +54,7 @@
 
 
     Gestion de compte:
-        -POST : http://localhost:8080/fournisseur-identite/api/updateCompte
+        -PUT : http://localhost:8080/fournisseur-identite/api/updateCompte
             Body:
                 {
                     "mdp":"adminadmin"
