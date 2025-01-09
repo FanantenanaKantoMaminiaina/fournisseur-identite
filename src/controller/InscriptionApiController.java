@@ -1,22 +1,20 @@
 package controller;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import connexion.Connexion;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import model.Utilisateur;
 import util.ApiResponse;
 import util.PropertiesLoader;
@@ -45,10 +43,11 @@ public class InscriptionApiController extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
         response.setContentType("application/json");
-Connection connection = null;
+
+        Connection connection = null;
 
         try {
             connection = Connexion.connect();
@@ -71,17 +70,17 @@ Connection connection = null;
             String email = jsonRequest.get("email").getAsString();
             String mdp = jsonRequest.get("mdp").getAsString();
 
-            Utilisateur utilisateur = new Utilisateur(email ,mdp);
-            utilisateur.inscription(connection, this.emailExpediteur , this.passwordExpediteur);
+            Utilisateur utilisateur = new Utilisateur(email, mdp);
+            utilisateur.inscription(connection, this.emailExpediteur, this.passwordExpediteur);
 
             Map<String, String> data = new HashMap<>();
             data.put("message", "Votre compte est en attente de validation, veuillez valider votre email!");
 
             response.getWriter().print(ApiResponse.success(data));
-          
+
             connection.commit();
         } catch (Exception ex) {
-            response.getWriter().print(ApiResponse.error(500, "Erreur interne de serveur , EMAIL = " +this.emailExpediteur + " , MDP = " +this.passwordExpediteur, ex.getMessage()));
+            response.getWriter().print(ApiResponse.error(500, "Erreur interne de serveur", ex.getMessage()));
         } finally {
             if (connection != null) {
                 try {
@@ -93,30 +92,33 @@ Connection connection = null;
         }
     }
 
+
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
         response.setContentType("application/json");
+
         String validationToken = request.getParameter("validationToken");
         Connection connection = null;
 
         try {
             connection = Connexion.connect();
 
-            if (validationToken==null ) {
+            if (validationToken == null) {
                 response.getWriter().print(ApiResponse.error(400, "validationToken est obligatoire", null));
                 return;
             }
+
             Utilisateur utilisateur = new Utilisateur();
-            utilisateur.verifierEmail(connection ,validationToken);
+            utilisateur.verifierEmail(connection, validationToken);
 
             Map<String, String> data = new HashMap<>();
-            data.put("message", "Votre compte a bien ete crée, veuillez vous connecter!");
+            data.put("message", "Votre compte a bien été créé, veuillez vous connecter!");
 
-            response.getWriter().print(ApiResponse.success(data));  
+            response.getWriter().print(ApiResponse.success(data));
             connection.commit();
         } catch (Exception ex) {
-            response.getWriter().print(ApiResponse.error(500, "Erreur interne de serveur , EMAIL = " +this.emailExpediteur + " , MDP = " +this.passwordExpediteur, ex.getMessage()));
+            response.getWriter().print(ApiResponse.error(500, "Erreur interne de serveur, EMAIL = " + this.emailExpediteur + " , MDP = " + this.passwordExpediteur, ex.getMessage()));
         } finally {
             if (connection != null) {
                 try {
