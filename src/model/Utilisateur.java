@@ -181,7 +181,7 @@ public class Utilisateur{
     // insertion temporaire dans utilisateur_temp
     public String insererUtilisateurTemporaire(Connection connection) throws SQLException {
         String sql = "INSERT INTO utilisateur_temp (email, mdp, validation_token, expiration_date) " +
-                     "VALUES (?, ?, ?, NOW() + INTERVAL '15 minutes')";
+                     "VALUES (?, ?, ?, NOW() + INTERVAL '1 day')";
     
         String hashMdp = UtilitaireAuthentification.hashPassword(this.mdp);
         String validationToken = UtilitaireAuthentification.generateRandomToken();
